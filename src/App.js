@@ -1,25 +1,44 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import EarthquakeFilter from './components/EarthquakeFilter';
+import EarthquakeList from './components/EarthquakeList';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const EarthquakeData = () => {
+    const [earthquakes, setEarthquakes] = useState([]);
+    const [search, setSearch] = useState(''); // Default minimum magnitude
 
-export default App;
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(
+                    'https://api.orhanaydogdu.com.tr/deprem/kandilli/live'
+                );
+                setEarthquakes(response.data.result);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
+
+    const handleSearchChange = (value) => {
+        setSearch(value);
+    };
+
+    const filteredEarthquakes = earthquakes.filter((earthquake) =>
+        earthquake.title.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <div className="list">
+            <EarthquakeFilter
+                search={search}
+                onSearchChange={handleSearchChange}
+            />
+            <EarthquakeList earthquakes={filteredEarthquakes} />
+        </div>
+    );
+};
+
+export default EarthquakeData;
